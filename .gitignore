@@ -6,6 +6,13 @@ model/
 prepared_data/
 data/
 results/
+oasst_results/
+
+# Dataset files
+oasst1_prepared_train/
+oasst1_prepared_val/
+oasst1_train_10k/
+oasst1_val_1k/
 
 # Python cache
 __pycache__/
@@ -47,3 +54,13 @@ logs/
 .env
 .env.local
 .env.*.local
+
+# Large arrow files
+*.arrow
+
+# Optimizer states
+optimizer.pt
+rng_state.pth
+scaler.pt
+scheduler.pt
+*.safetensors
