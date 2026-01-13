@@ -1,118 +1,106 @@
-╔══════════════════════════════════════════════════════════════════╗
-║                    MODEL TRAINING GUIDE                          ║
-║                   ══════════════════                           ║
-║  ┌─┐┌─┐┬─┐┬┌─┐┌─┐  ┌─┐┬ ┬┌─┐┬─┐  ┌─┐┬─┐┌─┐┌─┐               ║
-║  │  ├─┤├┬┘│├┤ └─┐  ├┤ │ │├─┤├┬┘  ├┤ ├┬┘├┤ └─┐               ║
-║  └─┘┴ ┴┴└─┴└─┘└─┘  └  └─┘┴ ┴┴└─  └─┘┴└─└─┘└─┘               ║
-║                                                                ║
-║    Fine-tuning a Coding Model with Quantization                ║
-╚══════════════════════════════════════════════════════════════════╝
+ 
 
-Quantization means converting the model into a smaller version
-that works similarly but with slightly less accurate output
-and fewer parameters compared to the main model.
+  MODEL TRAINING GUIDE
+  ==================
 
-┌─────────────────────────────────────────────────────────────────┐
-│ STEP 1: PREREQUISITES                                           │
-└─────────────────────────────────────────────────────────────────┘
+  Fine-tuning a Coding Model with Quantization
 
-[✓] Need a good GPU for model training (e.g., RTX 3050 with 6GB VRAM)
-    Note: In CUDA training, only VRAM works, not shared memory.
+  Quantization means converting the model into a smaller version
+  that works similarly but with slightly less accurate output
+  and fewer parameters compared to the main model.
 
-[✓] Quantized the model to 4-bit to reduce memory usage
+  STEP 1: PREREQUISITES
+  ====================
 
-[✓] Python environment: Python 3.10 (not 3.14!)
-    (Transformers don't support newer Python versions)
+  [✓] Need a good GPU for model training (e.g., RTX 3050 with 6GB VRAM)
+      Note: In CUDA training, only VRAM works, not shared memory.
 
-[✓] Core Libraries:
-    ┌─────────────────────────────────────────────────────────────┐
-    │ [+] torch            → GPU acceleration (PyTorch)           │
-    │ [+] transformers     → Hugging Face models                │
-    │ [+] datasets         → Load training data                 │
-    │ [+] accelerate       → Memory optimization                │
-    │ [+] peft             → LoRA for efficient training        │
-    │ [+] bitsandbytes     → 4-bit quantization                 │
-    └─────────────────────────────────────────────────────────────┘
+  [✓] Quantized the model to 4-bit to reduce memory usage
 
-[✓] Model Used: Qwen/Qwen2.5-Coder-0.5B → Local model folder
+  [✓] Python environment: Python 3.10 (not 3.14!)
+      (Transformers don't support newer Python versions)
 
-┌─────────────────────────────────────────────────────────────────┐
-│ DATASET SELECTION                                               │
-└─────────────────────────────────────────────────────────────────┘
+  [✓] Core Libraries:
+      [+] torch            → GPU acceleration (PyTorch)
+      [+] transformers     → Hugging Face models
+      [+] datasets         → Load training data
+      [+] accelerate       → Memory optimization
+      [+] peft             → LoRA for efficient training
+      [+] bitsandbytes     → 4-bit quantization
 
-[+] Used MBPP (Mostly Basic Python Programming)
-[+] 974 examples
-[+] Format: Clean, no solutions in prompts
-[+] Can try different datasets as your device allows
+  [✓] Model Used: Qwen/Qwen2.5-Coder-0.5B → Local model folder
 
-┌─────────────────────────────────────────────────────────────────┐
-│ DATA PREPARATION FLOW                                           │
-└─────────────────────────────────────────────────────────────────┘
+  DATASET SELECTION
+  ===============
 
-Raw text → Formatting → Tokenization → Training ready
+  [+] Used MBPP (Mostly Basic Python Programming)
+  [+] 974 examples
+  [+] Format: Clean, no solutions in prompts
+  [+] Can try different datasets as your device allows
 
-┌─────────────────────────────────────────────────────────────────┐
-│ TRAINING PROCESS                                                  │
-└─────────────────────────────────────────────────────────────────┘
+  DATA PREPARATION FLOW
+  ===================
 
-Common Problems & Solutions:
-[!] CUDA out of memory → 4-bit quantization
-[!] Can't fine-tune 4-bit → LoRA adapters
-[!] String format error → Fixed tokenization
-[!] GPU not used → Force with .to("cuda")
+  Raw text → Formatting → Tokenization → Training ready
 
-┌─────────────────────────────────────────────────────────────────┐
-│ CODE SNIPPETS EXPLANATION                                       │
-└─────────────────────────────────────────────────────────────────┘
+  TRAINING PROCESS
+  ==============
 
-[+] download_model.py:
-    ┌─────────────────────────────────────────────────────────────┐
-    │ Downloads pre-trained model from Hugging Face               │
-    │ [•] transformers lib has all HF models                      │
-    │ [•] AutoModelForCausalLM = text generation model            │
-    │ [•] AutoTokenizer = text to number converter                │
-    │ [•] Model download:                                         │
-    │     model = AutoModelForCausalLM.from_pretrained(           │
-    │       "Qwen/Qwen2.5-Coder-0.5B", trust_remote_code=True)   │
-    └─────────────────────────────────────────────────────────────┘
+  Common Problems & Solutions:
+  [!] CUDA out of memory → 4-bit quantization
+  [!] Can't fine-tune 4-bit → LoRA adapters
+  [!] String format error → Fixed tokenization
+  [!] GPU not used → Force with .to("cuda")
 
-    • HOW: Connects to internet, downloads 1.8GB of weights
-    • WHY "Qwen/Qwen2.5-Coder-0.5B": Small coding model for 6GB GPU
-    • WHY trust_remote_code=True: Qwen has custom code needing
-      permission
+  CODE SNIPPETS EXPLANATION
+  ========================
 
-    • Download tokenizer (text processor)
-      tokenizer = AutoTokenizer.from_pretrained(
-        "Qwen/Qwen2.5-Coder-0.5B", trust_remote_code=True)
-    • Saves weights and tokenizer configs locally
+  [+] download_model.py:
+      Downloads pre-trained model from Hugging Face
+      [•] transformers lib has all HF models
+      [•] AutoModelForCausalLM = text generation model
+      [•] AutoTokenizer = text to number converter
+      [•] Model download:
+          model = AutoModelForCausalLM.from_pretrained(
+            "Qwen/Qwen2.5-Coder-0.5B", trust_remote_code=True)
 
-[+] download_dataset.py:
-    • Imports dataset loader tool (datasets library)
-    • Downloads MBPP dataset:
-      dataset = load_dataset("code-rag-bench/mbpp", "default")
-    • Saves dataset locally for offline access
-      dataset.save_to_disk("data")
+      • HOW: Connects to internet, downloads 1.8GB of weights
+      • WHY "Qwen/Qwen2.5-Coder-0.5B": Small coding model for 6GB GPU
+      • WHY trust_remote_code=True: Qwen has custom code needing
+        permission
 
-[+] prepare_data.py:
-    • Imports necessary tools (load_from_disk, AutoTokenizer)
-    • Loads tokenizer from your downloaded model
-    • Loads dataset from local storage
-    • Formats examples with template: "Task: [desc]\nSolution:\n[code]"
-    • Tokenizes text (converts to numbers)
-    • Saves prepared data for training
-      tokenized.save_to_disk("prepared_data")
+      • Download tokenizer (text processor)
+        tokenizer = AutoTokenizer.from_pretrained(
+          "Qwen/Qwen2.5-Coder-0.5B", trust_remote_code=True)
+      • Saves weights and tokenizer configs locally
 
-[+] train.py:
-    • Imports training components (AutoModelForCausalLM,
-      TrainingArguments, Trainer, torch)
-    • Loads model and moves to GPU
-    • Configures training parameters
-    • Sets up Trainer with model, args, and train_dataset
-    • Starts training process: trainer.train()
-    • Monitors loss values and saves checkpoints
+  [+] download_dataset.py:
+      • Imports dataset loader tool (datasets library)
+      • Downloads MBPP dataset:
+        dataset = load_dataset("code-rag-bench/mbpp", "default")
+      • Saves dataset locally for offline access
+        dataset.save_to_disk("data")
 
-[+] Verify Model Directory:
-    • Import OS module for file operations
-    • Check if model exists at specified path
-    • Verify weights file (.safetensors format) exists
-    • Output: ✓ if found, ✗ if missing
+  [+] prepare_data.py:
+      • Imports necessary tools (load_from_disk, AutoTokenizer)
+      • Loads tokenizer from your downloaded model
+      • Loads dataset from local storage
+      • Formats examples with template: "Task: [desc]\nSolution:\n[code]"
+      • Tokenizes text (converts to numbers)
+      • Saves prepared data for training
+        tokenized.save_to_disk("prepared_data")
+
+  [+] train.py:
+      • Imports training components (AutoModelForCausalLM,
+        TrainingArguments, Trainer, torch)
+      • Loads model and moves to GPU
+      • Configures training parameters
+      • Sets up Trainer with model, args, and train_dataset
+      • Starts training process: trainer.train()
+      • Monitors loss values and saves checkpoints
+
+  [+] Verify Model Directory:
+      • Import OS module for file operations
+      • Check if model exists at specified path
+      • Verify weights file (.safetensors format) exists
+      • Output: ✓ if found, ✗ if missing
